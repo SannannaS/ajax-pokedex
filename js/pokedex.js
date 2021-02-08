@@ -19,10 +19,7 @@ Pokemon.FetchPokemon = async function(id)
 {
     let data = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}/`);
     data = await data.json();
-
-    let tempPokemon = new Pokemon(data.name, data.id, data.moves, data.sprites);
-    return tempPokemon;
-
+    return new Pokemon(data.name, data.id, data.moves, data.sprites);
 }
 
 Pokemon.prototype.GetSpecies = async function()
@@ -31,12 +28,10 @@ Pokemon.prototype.GetSpecies = async function()
     speciesData = await speciesData.json();
     console.log(speciesData);
     return speciesData;
-
 }
 
 Pokemon.prototype.GetPrevEvolution = async function()
 {
-
     let data = await this.GetSpecies();
     let name = data.evolves_from_species.name;
     console.log(name);
@@ -49,12 +44,12 @@ Pokemon.prototype.GetPrevEvolution = async function()
  * @returns {Promise<*>}
  * @constructor
  */
-// Pokemon.prototype.GetNextEvolutions = async function()
-// {
-//     let data = await this.GetEvolutionChain();
-//     console.table(data.chain.evolves_to);
-//     return data.chain.evolves_to;
-// }
+Pokemon.prototype.GetNextEvolutions = async function()
+{
+    let data = await this.GetEvolutionChain();
+    console.table(data.chain.evolves_to);
+    return data.chain.evolves_to;
+}
 
 Pokemon.prototype.GetEvolutionChain = async function()
 {
@@ -63,5 +58,4 @@ Pokemon.prototype.GetEvolutionChain = async function()
     //console.log(evolutionData);
     evolutionData = await evolutionData.json();
     return evolutionData;
-
 }
