@@ -51,7 +51,7 @@ Pokemon.GetPokemonCount = async function ()
  */
 Pokemon.prototype.GetSpecies = async function ()
 {
-    let speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${this.id}/`);
+
     speciesData = await speciesData.json();
     // console.log(speciesData);
     return speciesData;
@@ -65,14 +65,11 @@ Pokemon.prototype.GetSpecies = async function ()
  */
 Pokemon.prototype.GetPrevEvolution = async function ()
 {
-    try {
-        let data = await this.GetSpecies();
-        let name = data.evolves_from_species.name;
-        // console.log(name);
-        return name;
-    } catch (err) {
-        return null;
-    }
+    let speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${this.id}/`);
+    let data = await speciesData.json();
+    return Pokemon.FetchPokemon(data.evolves_from_species.name);
+
+
 }
 
 // /**
@@ -121,11 +118,23 @@ document.getElementById("submit").addEventListener("click", () =>
         console.log(newPokemon.id);
         //DONE USING POKEMON DATA FOR POKEDEX
 
-
-
         //get previous evolution of this pokemon
-        newPokemon.GetPrevEvolution();
+        //if there is no previous evolution, catch the exception and handle it.
+        let prevPokemon;
+        await newPokemon.GetPrevEvolution()
+            .then((newPokemon) =>
+            {
+                prevPokemon = newPokemon;
+                console.log(prevPokemon.name);
+                console.log(prevPokemon.id);
 
+            })
+            .catch((err) =>
+            {
+                console.log("no prior evolution!");
+            });
+
+        console.log("...executing next job!");
 
     })();
 
