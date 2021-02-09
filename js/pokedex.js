@@ -108,19 +108,6 @@ Pokemon.prototype.GetPrevEvolution = async function ()
 
 /**
  * !!!IN PROGRESS!!!
- * gets the next links in the evolution chain and returns as array of pokemon objects
- * @returns {Promise<*>}
- * @constructor
- */
-Pokemon.prototype.GetNextEvolutions = async function ()
-{
-    let data = await this.GetEvolutionChain();
-    console.table(data.chain.evolves_to);
-    return data.chain.evolves_to;
-}
-
-/**
- * !!!IN PROGRESS!!!
  * !!!DOES NOT WORK PROPERLY! USE AT OWN RISK!!!
  * returns the evolution chain data of the Pokemon in question
  * TODO: rewrite this to instead return an array of pokemon objects rather than just the raw JSON data
@@ -129,15 +116,34 @@ Pokemon.prototype.GetNextEvolutions = async function ()
  */
 Pokemon.prototype.getNextEvolutions = async function()
 {
-    let chain = [];
+    //get evolution chain object
+    let nextPokemon = [];
     let species = await this.GetSpecies();
     let evoChain = await fetch(species.evolution_chain.url);
     evoChain = await evoChain.json();
+    evoChain = evoChain.chain;
+
+    //first link in the chain
+    // for(let i = 0; i < 3; i++)
+    // {
+    //
+    // }
+    console.log(evoChain.species.name);
+    //setp down in link
+    evoChain = evoChain.evolves_to;
+    for(let j = 0; j < evoChain.length; j++)
+    {
+        nextPokemon[1].push(await Pokemon.FetchPokemon(evoChain[j].species.name));
+        console.log(nextPokemon[j].name);
+    }
+
+    return nextPokemon;
+    //start parsing the evo chain
 }
 
 //start actual pokedex
-let input = document.getElementById("userInput");
-document.getElementById("submit").addEventListener("click", () =>
+let input = document.getElementById("pokemon-name");
+document.getElementById("search-button").addEventListener("click", () =>
 {
     //get pokemon based on user input
     (async () =>
@@ -184,7 +190,7 @@ document.getElementById("submit").addEventListener("click", () =>
         //return four moves of the pokemon in question
         console.log(thisPokemon.GetMoves(4,false));
 
-        Pokemon.GetData();
+        thisPokemon.getNextEvolutions();
     })();
 
 
