@@ -183,6 +183,8 @@ document.getElementById("submit").addEventListener("click", () =>
 
         //return four moves of the pokemon in question
         console.log(thisPokemon.GetMoves(4,false));
+
+        Pokemon.GetData();
     })();
 
 
