@@ -128,8 +128,7 @@ Pokemon.prototype.GetEvolutions = async function ()
     evoChain = evoChain.chain;
     //first, check if the pokemon has any evolutions to begin with
     //if not, return null
-    if(evoChain.evolves_to.length === 0)
-    {
+    if (evoChain.evolves_to.length === 0) {
         console.log("no evolutions!");
         return null;
     }
@@ -157,12 +156,12 @@ Pokemon.prototype.GetEvolutions = async function ()
     //start parsing the evo chain
 }
 
-Pokemon.prototype.GetFrontSpriteUrl = function()
+Pokemon.prototype.GetFrontSpriteUrl = function ()
 {
     return this.sprites.front_default;
 }
 
-Pokemon.prototype.GetFrontShinySpriteUrl = function()
+Pokemon.prototype.GetFrontShinySpriteUrl = function ()
 {
     return this.sprites.front_shiny;
 }
@@ -172,13 +171,14 @@ Pokemon.prototype.GetFrontShinySpriteUrl = function()
  * @param {number/string}pokemon
  * @constructor
  */
-const UpdatePokedexDisplay = async function(searchIndex){
+const UpdatePokedexDisplay = async function (searchIndex)
+{
 
     let currentPokemon;
     currentPokemon = await Pokemon.FetchPokemon(searchIndex);
     currentIndex = currentPokemon.id;
     //set main Pokemon data
-    mainPokemonDsp.setAttribute("src",currentPokemon.mainArt);
+    mainPokemonDsp.setAttribute("src", currentPokemon.mainArt);
     mainPokemonDsp.style.visibility = "visible";
 
     nameDsp.innerText = currentPokemon.name;
@@ -189,21 +189,22 @@ const UpdatePokedexDisplay = async function(searchIndex){
 
     //set move names
     let moveArray = currentPokemon.GetMoves(moveDsps.length, true);
-    for(let i = 0; i < moveDsps.length; i++)
-    {
+    for (let i = 0; i < moveDsps.length; i++) {
         moveDsps[i].innerText = moveArray[i];
     }
     //get evolution chain data
     let evolutionChain = await currentPokemon.GetEvolutions();
-    if(evolutionChain != null){
+    if (evolutionChain != null) {
 
         await Pokemon.FetchPokemon(evolutionChain[0][0])
-            .then((firstLink)=>{
-                let id = firstLink.id;
+            .then((firstLink) =>
+            {
+                firstLinkId = firstLink.id;
                 evolutionDsps[0].setAttribute("src", firstLink.GetFrontSpriteUrl());
                 evolutionDsps[0].style.visibility = "visible";
             })
-            .catch((err)=>{
+            .catch((err) =>
+            {
                 evolutionDsps[0].style.visibility = "hidden";
             });
 
@@ -213,40 +214,43 @@ const UpdatePokedexDisplay = async function(searchIndex){
         // }
 
         await Pokemon.FetchPokemon(evolutionChain[1][0])
-            .then((secondLink)=>{
+            .then((secondLink) =>
+            {
+                secondLinkId = secondLink.id;
                 evolutionDsps[1].setAttribute("src", secondLink.GetFrontSpriteUrl());
                 evolutionDsps[1].style.visibility = "visible";
+                evolutionDsps[1]
                 evoArrows[0].style.visibility = "visible";
             })
-            .catch((err)=>{
+            .catch((err) =>
+            {
                 evolutionDsps[1].style.visibility = "hidden";
                 evoArrows[0].style.visibility = "hidden";
             });
 
         await Pokemon.FetchPokemon(evolutionChain[2][0])
-            .then((thirdLink)=>{
+            .then((thirdLink) =>
+            {
+                thirdLinkId = thirdLink.id;
                 evolutionDsps[2].setAttribute("src", thirdLink.GetFrontSpriteUrl());
                 evolutionDsps[2].style.visibility = "visible";
                 evoArrows[1].style.visibility = "visible";
             })
-            .catch((err)=>{
+            .catch((err) =>
+            {
                 evolutionDsps[2].style.visibility = "hidden";
                 evoArrows[1].style.visibility = "hidden";
             });
     }
-    else
-    {
-        for(let display of evolutionDsps)
-        {
+    else {
+        for (let display of evolutionDsps) {
             display.style.visibility = "hidden";
 
         }
-        for(let arrow of evoArrows)
-        {
+        for (let arrow of evoArrows) {
             arrow.style.visibility = "hidden";
         }
     }
-
 
 
     // console.table(evolutionChain);
@@ -259,6 +263,9 @@ const UpdatePokedexDisplay = async function(searchIndex){
 
 const MAX_POKEMON = 898;
 let currentIndex = 1;
+let firstLinkId;
+let secondLinkId;
+let thirdLinkId;
 let input = document.getElementById("pokemon-name");
 let nameDsp = document.getElementById("poke-display__name");
 let idDsp = document.getElementById("poke-display__id");
@@ -271,16 +278,49 @@ let evoArrows = document.getElementsByClassName("poke-arrow");
 
 let mainPokemonDsp = document.getElementById("poke-display__img__front");
 
+evolutionDsps[0].addEventListener("click", (index) =>
+{
+    (async () =>
+    {
+        try {
+            await UpdatePokedexDisplay(firstLinkId);
+        } catch (err) {
+            console.error("your link's broken I guess");
+        }
+    })();
+});
+evolutionDsps[1].addEventListener("click", (index) =>
+{
+    (async () =>
+    {
+        try {
+            await UpdatePokedexDisplay(secondLinkId);
+        } catch (err) {
+            console.error("your link's broken I guess");
+        }
+    })();
+});
+evolutionDsps[2].addEventListener("click", (index) =>
+{
+    (async () =>
+    {
+        try {
+            await UpdatePokedexDisplay(thirdLinkId);
+        } catch (err) {
+            console.error("your link's broken I guess");
+        }
+    })();
+});
+
 
 document.getElementById("search-button").addEventListener("click", () =>
 {
     //get pokemon based on user input
     (async () =>
     {
-        try{
+        try {
             await UpdatePokedexDisplay(input.value);
-        }
-        catch(err){
+        } catch (err) {
             console.error("Pokemon not found!")
         }
 
@@ -288,7 +328,7 @@ document.getElementById("search-button").addEventListener("click", () =>
 
 })
 
-document.getElementById("button-A").addEventListener("click",()=>
+document.getElementById("button-A").addEventListener("click", () =>
 {
     (async () =>
     {
@@ -299,7 +339,8 @@ document.getElementById("button-A").addEventListener("click",()=>
     })();
 })
 
-document.getElementById("button-B").addEventListener("click",()=>{
+document.getElementById("button-B").addEventListener("click", () =>
+{
     (async () =>
     {
         currentIndex--;
