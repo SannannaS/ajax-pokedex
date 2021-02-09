@@ -6,15 +6,20 @@
  * @param {number} id of the pokemon
  * @param {} moves moves stores an array of all possible moves a pokemon can do. These are currently stored raw.
  * @param {} sprites stores an array with links to sprites that can be useful in displaying the pokemon in question.
+ * @param {number} height stores pokemon height
+ * @param {number} weight stores pokemon weight
  * @constructor
  */
-let Pokemon = function (name, id, moves, sprites)
+let Pokemon = function (name, id, moves, sprites, height, weight)
 {
     this.name = name;               //this pokemon's name
     this.id = id;                   //this pokemon's ID
     this.moves = moves;             //contains all the moves this pokemon has/can learn
     this.sprites = sprites;         //stores sprites
     this.mainArt = sprites.other['official-artwork'].front_default;      //link to official artwork
+
+    this.height = height;
+    this.weight = weight;
 }
 
 /**
@@ -27,7 +32,7 @@ Pokemon.FetchPokemon = async function (id)
 {
     let data = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`);
     data = await data.json();
-    return new Pokemon(data.name, data.id, data.moves, data.sprites);
+    return new Pokemon(data.name, data.id, data.moves, data.sprites, data.height, data.weight);
 }
 
 /**
@@ -156,6 +161,14 @@ Pokemon.prototype.GetFrontShinySpriteUrl = function()
 
 //start actual pokedex
 let input = document.getElementById("pokemon-name");
+let nameDsp = document.getElementById("poke-display__name");
+let idDsp = document.getElementById("poke-display__id");
+let heightDsp = document.getElementById("poke-display__height");
+let weightDsp = document.getElementById("poke-display__weight");
+
+let mainPokemonDsp = document.getElementById("poke-display__img__front");
+
+
 document.getElementById("search-button").addEventListener("click", () =>
 {
     //get pokemon based on user input
@@ -212,12 +225,26 @@ document.getElementById("search-button").addEventListener("click", () =>
 
         console.log(await thisPokemon.GetNextEvolutions());
 
-        document.getElementById("poke-display__img__front").setAttribute("src",thisPokemon.mainArt);
+        mainPokemonDsp.setAttribute("src",thisPokemon.mainArt);
+        mainPokemonDsp.style.visibility = "visible";
 
-        thisPokemon.getNextEvolutions();
+        nameDsp.innerText = thisPokemon.name;
+        idDsp.innerText = thisPokemon.id.toString();
 
-        document.getElementById("poke-display__img__front").setAttribute("src",thisPokemon.mainArt);
+        heightDsp.innerText = thisPokemon.height.toString();
+        weightDsp.innerText = thisPokemon.weight.toString();
     })();
+
+    document.getElementById("reset-button").addEventListener("click", () =>
+    {
+        input.value = "";
+        mainPokemonDsp.style.visibility = "hidden";
+        mainPokemonDsp.setAttribute("src", "");
+        nameDsp.innerText = "";
+        idDsp.innerText = "";
+        heightDsp.innerText = "";
+        weightDsp.innerText = "";
+    });
 
 
 })
