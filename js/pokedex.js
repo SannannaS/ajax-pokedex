@@ -8,7 +8,7 @@
  * @param {} sprites stores an array with links to sprites that can be useful in displaying the pokemon in question.
  * @constructor
  */
-let Pokemon = function (name, id, moves, sprites)
+const Pokemon = function (name, id, moves, sprites)
 {
     this.name = name;               //this pokemon's name
     this.id = id;                   //this pokemon's ID
@@ -51,27 +51,23 @@ Pokemon.GetPokemonCount = async function ()
  * @returns {[]} returns an array of names
  * @constructor
  */
-Pokemon.prototype.GetMoves = function(moveCount = 4, selectRandom = false)
+Pokemon.prototype.GetMoves = function (moveCount = 4, selectRandom = false)
 {
     let moveArray = [];
-    if(this.moves.length > moveCount){
-        for(let i = 0; i < moveCount; i++)
-        {
+    if (this.moves.length > moveCount) {
+        for (let i = 0; i < moveCount; i++) {
             let index = i;
-            if(selectRandom) index = Math.random()*this.moves.length | 0;
+            if (selectRandom) index = Math.random() * this.moves.length | 0;
 
             moveArray.push(this.moves[i].move.name);
         }
     }
-    else{
-        for(let i = 0; i < moveCount; i++)
-        {
-            if(this.moves[i] != null)
-            {
+    else {
+        for (let i = 0; i < moveCount; i++) {
+            if (this.moves[i] != null) {
                 moveArray.push(this.moves[i].move.name);
             }
-            else
-            {
+            else {
                 moveArray.push("X");
             }
         }
@@ -108,36 +104,43 @@ Pokemon.prototype.GetPrevEvolution = async function ()
 
 /**
  * !!!IN PROGRESS!!!
- * !!!DOES NOT WORK PROPERLY! USE AT OWN RISK!!!
- * returns the evolution chain data of the Pokemon in question
- * TODO: rewrite this to instead return an array of pokemon objects rather than just the raw JSON data
- * @returns {Promise<*|Response>}
+ *
+ * returns the evolution chain data of the Pokemon in question in the form of a nested array
+ * the horizontal array determines the length of the evolution array
+ * the vertical array determines alternative evolutions at that stage of the evolution chain
+ * this is primarily to work with Eevee and its plethora of evolutionary forms
+ *  * @returns {Promise<*|Response>}
  * @constructor
  */
-Pokemon.prototype.getNextEvolutions = async function()
+Pokemon.prototype.getNextEvolutions = async function ()
 {
     //get evolution chain object
-    let nextPokemon = [];
+    let evoArray = [[], [], []];
     let species = await this.GetSpecies();
     let evoChain = await fetch(species.evolution_chain.url);
     evoChain = await evoChain.json();
     evoChain = evoChain.chain;
 
-    //first link in the chain
-    // for(let i = 0; i < 3; i++)
-    // {
-    //
-    // }
-    console.log(evoChain.species.name);
-    //setp down in link
-    evoChain = evoChain.evolves_to;
-    for(let j = 0; j < evoChain.length; j++)
-    {
-        nextPokemon[1].push(await Pokemon.FetchPokemon(evoChain[j].species.name));
-        console.log(nextPokemon[j].name);
+    //figure out first pokemon in the chain and add to chain
+    //because the first pokemon in the chain is NEVER an array (it is known) we can't loop through it.
+    if (evoChain.species.name.toLowerCase() === this.name) {
+        evoArray[0].push(this.name);
+    }
+    else {
+        evoArray[0].push(evoChain.species.name);
     }
 
-    return nextPokemon;
+    //retrieve the next 2 links in the chain
+    evoChain = evoChain.evolves_to;
+    for (let i = 0; i < evoChain.length; i++) {
+        evoArray[1].push(evoChain[i].species.name);
+        for (let j = 0; j < evoChain[i].evolves_to.length; j++) {
+            evoArray[2].push(evoChain[i].evolves_to[j].species.name);
+        }
+
+    }
+
+    return evoArray;
     //start parsing the evo chain
 }
 
@@ -188,9 +191,9 @@ document.getElementById("search-button").addEventListener("click", () =>
         //     });
 
         //return four moves of the pokemon in question
-        console.log(thisPokemon.GetMoves(4,false));
+        console.log(thisPokemon.GetMoves(4, false));
 
-        thisPokemon.getNextEvolutions();
+        console.log(await thisPokemon.getNextEvolutions());
     })();
 
 
