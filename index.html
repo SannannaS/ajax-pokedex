@@ -13,8 +13,6 @@
 <body>
 
 
-
-
 <div class="pokedex">
     <div class="left-container" id="left-container__cosmetics">
         <div class="left-container__top-section">
@@ -31,24 +29,24 @@
                     <div class="main-section__black">
                         <div class="main-screen hide">
                             <div class="screen__header">
-                                <span class="poke-name"></span>
-                                <span class="poke-id"></span>
+                                <span class="poke-name" id="poke-display__name">Test</span>
+                                <span class="poke-id" id="poke-display__id">01</span>
                             </div>
                             <div class="screen__image">
-                                <img src="" class="poke-front-image" alt="front">
-                                <img src="" class="poke-back-image" alt="back">
+                                <img src="" class="poke-front-image" alt="front" id="poke-display__img__front">
+                                <img src="" class="poke-back-image" alt="back" id="poke-display__img__back">
                             </div>
                             <div class="screen__description">
                                 <div class="stats__types">
-                                    <span class="poke-type-one"></span>
-                                    <span class="poke-type-two"></span>
+                                    <span class="poke-type-one" id="poke__type__one"></span>
+                                    <span class="poke-type-two" id="poke__type__two"></span>
                                 </div>
                                 <div class="screen__stats">
                                     <p class="stats__weight">
-                                        weight: <span class="poke-weight"></span>
+                                        weight: <span class="poke-weight" id="poke-display__weight"></span>
                                     </p>
                                     <p class="stats__height">
-                                        height: <span class="poke-height"></span>
+                                        height: <span class="poke-height" id="poke-display__height"></span>
                                     </p>
                                 </div>
                             </div>
@@ -64,8 +62,8 @@
                         <div class="d-pad__cell bottom"></div>
                     </div>
                     <div class="controllers__buttons">
-                        <div class="buttons__button">B</div>
-                        <div class="buttons__button">A</div>
+                        <div class="buttons__button" id="button-B">B</div>
+                        <div class="buttons__button" id="button-A">A</div>
                     </div>
                 </div>
             </div>
