@@ -8,15 +8,13 @@
  * @param {} sprites stores an array with links to sprites that can be useful in displaying the pokemon in question.
  * @constructor
  */
-const Pokemon = function (name, id, moves, sprites)
+let Pokemon = function (name, id, moves, sprites)
 {
     this.name = name;               //this pokemon's name
     this.id = id;                   //this pokemon's ID
     this.moves = moves;             //contains all the moves this pokemon has/can learn
     this.sprites = sprites;         //stores sprites
     this.mainArt = sprites.other['official-artwork'].front_default;      //link to official artwork
-
-    this.height
 }
 
 /**
@@ -190,13 +188,35 @@ document.getElementById("search-button").addEventListener("click", () =>
             });
         console.log("...executing next job!");
 
+        //get full evolution chain of this pokemon
+        // await newPokemon.GetEvolutionChain()
+        //     .then((chain) =>
+        //     {
+        //         console.log(chain);
+        //
+        //     })
+        //     .catch((err) =>
+        //     {
+        //         console.error("oops!");
+        //     });
+
         //return four moves of the pokemon in question
         console.log(thisPokemon.GetMoves(4, false));
+      //  console.log(thisPokemon.GetMoves(4,false));
+
+      //  console.log("name: " + thisPokemon.name);
+     //   console.log("id: " + thisPokemon.id);
+      //  console.log("moves: " + thisPokemon.moves);
+      //  console.log("sprited: " + thisPokemon.sprites);
+
 
         console.log(await thisPokemon.GetNextEvolutions());
 
         document.getElementById("poke-display__img__front").setAttribute("src",thisPokemon.mainArt);
 
+        thisPokemon.getNextEvolutions();
+
+        document.getElementById("poke-display__img__front").setAttribute("src",thisPokemon.mainArt);
     })();
 
 

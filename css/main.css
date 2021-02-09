@@ -8,6 +8,7 @@
 body {
     display: flex;
     font-family: 'Press Start 2P', sans-serif;
+    font-size: 10px;
     justify-content: center;
     background-image: url('backgroundPicture.jpg');
     background-repeat: no-repeat;
@@ -106,17 +107,18 @@ body {
     align-items: center;
     display: flex;
     justify-content: space-between;
+
 }
 
 .poke-name {
     color: white;
-    font-size: 25px;
+    font-size: 20px;
     font-weight: bold;
 }
 
 .poke-id {
-    color: rgba(0,0,0,.5);
     font-size: 20px;
+    color: white;
 }
 
 .screen__image {
@@ -382,10 +384,10 @@ body {
     box-shadow: inset 0 0 2px 2px rgba(0,0,0,.3);
 }
 
-
+/*
 .hide {
     display: none;
-}
+} */
 
 .normal {
     background: #BABAAE;
