@@ -15,6 +15,8 @@ const Pokemon = function (name, id, moves, sprites)
     this.moves = moves;             //contains all the moves this pokemon has/can learn
     this.sprites = sprites;         //stores sprites
     this.mainArt = sprites.other['official-artwork'].front_default;      //link to official artwork
+
+    this.height
 }
 
 /**
@@ -112,7 +114,7 @@ Pokemon.prototype.GetPrevEvolution = async function ()
  *  * @returns {Promise<*|Response>}
  * @constructor
  */
-Pokemon.prototype.getNextEvolutions = async function ()
+Pokemon.prototype.GetNextEvolutions = async function ()
 {
     //get evolution chain object
     let evoArray = [[], [], []];
@@ -142,6 +144,16 @@ Pokemon.prototype.getNextEvolutions = async function ()
 
     return evoArray;
     //start parsing the evo chain
+}
+
+Pokemon.prototype.GetFrontSpriteUrl = function()
+{
+    return this.sprites.front_default;
+}
+
+Pokemon.prototype.GetFrontShinySpriteUrl = function()
+{
+    return this.sprites.front_shiny;
 }
 
 //start actual pokedex
@@ -178,22 +190,13 @@ document.getElementById("search-button").addEventListener("click", () =>
             });
         console.log("...executing next job!");
 
-        //get full evolution chain of this pokemon
-        // await newPokemon.GetEvolutionChain()
-        //     .then((chain) =>
-        //     {
-        //         console.log(chain);
-        //
-        //     })
-        //     .catch((err) =>
-        //     {
-        //         console.error("oops!");
-        //     });
-
         //return four moves of the pokemon in question
         console.log(thisPokemon.GetMoves(4, false));
 
-        console.log(await thisPokemon.getNextEvolutions());
+        console.log(await thisPokemon.GetNextEvolutions());
+
+        document.getElementById("poke-display__img__front").setAttribute("src",thisPokemon.mainArt);
+
     })();
 
 
