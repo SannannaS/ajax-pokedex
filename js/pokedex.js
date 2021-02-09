@@ -4,8 +4,8 @@
  * basic pokemon object for use within the pokedex. Stores basic or necessary information about a pokemon from the API.
  * @param {string} name name of the pokemon
  * @param {number} id of the pokemon
- * @param {} moves moves stores an array of all possible moves a pokemon can do. These are currently stored raw.
- * @param {} sprites stores an array with links to sprites that can be useful in displaying the pokemon in question.
+ * @param {Array} moves moves stores an array of all possible moves a pokemon can do. These are currently stored raw.
+ * @param {Array} sprites stores an array with links to sprites that can be useful in displaying the pokemon in question.
  * @param {number} height stores pokemon height
  * @param {number} weight stores pokemon weight
  * @constructor
@@ -136,18 +136,18 @@ Pokemon.prototype.GetEvolutions = async function ()
     //figure out first pokemon in the chain and add to chain
     //because the first pokemon in the chain is NEVER an array (it is known) we can't loop through it.
     if (evoChain.species.name.toLowerCase() === this.name) {
-        evoArray[0].push(this.name);
+        evoArray[0].push(this);
     }
     else {
-        evoArray[0].push(evoChain.species.name);
+        evoArray[0].push(await Pokemon.FetchPokemon(evoChain.species.name));
     }
 
     //retrieve the next 2 links in the chain
     evoChain = evoChain.evolves_to;
     for (let i = 0; i < evoChain.length; i++) {
-        evoArray[1].push(evoChain[i].species.name);
+        evoArray[1].push(await Pokemon.FetchPokemon(evoChain[i].species.name));
         for (let j = 0; j < evoChain[i].evolves_to.length; j++) {
-            evoArray[2].push(evoChain[i].evolves_to[j].species.name);
+            evoArray[2].push(await Pokemon.FetchPokemon(evoChain[i].evolves_to[j].species.name));
         }
 
     }
@@ -196,51 +196,54 @@ const UpdatePokedexDisplay = async function (searchIndex)
     let evolutionChain = await currentPokemon.GetEvolutions();
     if (evolutionChain != null) {
 
-        await Pokemon.FetchPokemon(evolutionChain[0][0])
-            .then((firstLink) =>
-            {
-                firstLinkId = firstLink.id;
-                evolutionDsps[0].setAttribute("src", firstLink.GetFrontSpriteUrl());
-                evolutionDsps[0].style.visibility = "visible";
-            })
-            .catch((err) =>
-            {
-                evolutionDsps[0].style.visibility = "hidden";
-            });
+        //check if there's a first evolution
+        if(evolutionChain[0][0])
+        {
+            let firstLink = evolutionChain[0][0];
+            firstLinkId = firstLink.id;
+            evolutionDsps[0].setAttribute("src", firstLink.GetFrontSpriteUrl());
+            evolutionDsps[0].style.visibility = "visible";
+        }
+        else
+        {
+            evolutionDsps[0].style.visibility = "hidden";
+        }
 
-        // if(evolutionChain[1].length > 1)
+        // if(evolutionChain[1].length < 2 && evolutionChain[1] != null)
         // {
-        //     console.log("get looping!")
+        //     for(let i = 0; i < evolutionChain[1].length; i++){
+        //
+        //     }
         // }
 
-        await Pokemon.FetchPokemon(evolutionChain[1][0])
-            .then((secondLink) =>
-            {
-                secondLinkId = secondLink.id;
-                evolutionDsps[1].setAttribute("src", secondLink.GetFrontSpriteUrl());
-                evolutionDsps[1].style.visibility = "visible";
-                evolutionDsps[1]
-                evoArrows[0].style.visibility = "visible";
-            })
-            .catch((err) =>
-            {
-                evolutionDsps[1].style.visibility = "hidden";
-                evoArrows[0].style.visibility = "hidden";
-            });
+        if(evolutionChain[1].length < 2 && evolutionChain[1].length > 0)
+        {
+            let secondLink = evolutionChain[1][0]
+            secondLinkId = secondLink.id;
+            evolutionDsps[1].setAttribute("src", secondLink.GetFrontSpriteUrl());
+            evolutionDsps[1].style.visibility = "visible";
+            evoArrows[0].style.visibility = "visible";
+        }
+        else
+        {
+            evolutionDsps[1].style.visibility = "hidden";
+            evoArrows[0].style.visibility = "hidden";
+        }
 
-        await Pokemon.FetchPokemon(evolutionChain[2][0])
-            .then((thirdLink) =>
-            {
-                thirdLinkId = thirdLink.id;
-                evolutionDsps[2].setAttribute("src", thirdLink.GetFrontSpriteUrl());
-                evolutionDsps[2].style.visibility = "visible";
-                evoArrows[1].style.visibility = "visible";
-            })
-            .catch((err) =>
-            {
-                evolutionDsps[2].style.visibility = "hidden";
-                evoArrows[1].style.visibility = "hidden";
-            });
+        if(evolutionChain[2].length < 2 && evolutionChain[2].length > 0)
+        {
+            let thirdLink = evolutionChain[2][0]
+            thirdLinkId = thirdLink.id;
+            evolutionDsps[2].setAttribute("src", thirdLink.GetFrontSpriteUrl());
+            evolutionDsps[2].style.visibility = "visible";
+            evoArrows[1].style.visibility = "visible";
+        }
+        else
+        {
+            evolutionDsps[2].style.visibility = "hidden";
+            evoArrows[1].style.visibility = "hidden";
+        }
+
     }
     else {
         for (let display of evolutionDsps) {
@@ -278,7 +281,7 @@ let evoArrows = document.getElementsByClassName("poke-arrow");
 
 let mainPokemonDsp = document.getElementById("poke-display__img__front");
 
-evolutionDsps[0].addEventListener("click", (index) =>
+evolutionDsps[0].addEventListener("click", () =>
 {
     (async () =>
     {
@@ -289,7 +292,7 @@ evolutionDsps[0].addEventListener("click", (index) =>
         }
     })();
 });
-evolutionDsps[1].addEventListener("click", (index) =>
+evolutionDsps[1].addEventListener("click", () =>
 {
     (async () =>
     {
@@ -300,7 +303,7 @@ evolutionDsps[1].addEventListener("click", (index) =>
         }
     })();
 });
-evolutionDsps[2].addEventListener("click", (index) =>
+evolutionDsps[2].addEventListener("click", () =>
 {
     (async () =>
     {
