@@ -159,7 +159,33 @@ Pokemon.prototype.GetFrontShinySpriteUrl = function()
     return this.sprites.front_shiny;
 }
 
-//start actual pokedex
+/**
+ *
+ * @param {number/string}pokemon
+ * @constructor
+ */
+const UpdatePokedexDisplay = async function(searchIndex){
+
+    let currentPokemon;
+    currentPokemon = await Pokemon.FetchPokemon(searchIndex);
+    //set main Pokemon data
+    mainPokemonDsp.setAttribute("src",currentPokemon.mainArt);
+    mainPokemonDsp.style.visibility = "visible";
+
+    nameDsp.innerText = currentPokemon.name;
+    idDsp.innerText = currentPokemon.id.toString();
+
+    heightDsp.innerText = currentPokemon.height.toString();
+    weightDsp.innerText = currentPokemon.weight.toString();
+}
+
+
+//==========================\\
+//===start actual pokedex===\\
+//==========================\\
+
+const MAX_POKEMON = 898;
+let currentIndex = 1;
 let input = document.getElementById("pokemon-name");
 let nameDsp = document.getElementById("poke-display__name");
 let idDsp = document.getElementById("poke-display__id");
@@ -177,6 +203,8 @@ document.getElementById("search-button").addEventListener("click", () =>
         //wait until we get a fresh pokemon from the API
         let thisPokemon;
         thisPokemon = await Pokemon.FetchPokemon(input.value)
+
+        currentIndex = thisPokemon.id;
 
         //we have retrieved the data of a new pokemon, now we can use this data for our pokedex
         //USE POKEMON DATA IN POKEDEX HERE
@@ -223,28 +251,48 @@ document.getElementById("search-button").addEventListener("click", () =>
       //  console.log("sprited: " + thisPokemon.sprites);
 
 
-        console.log(await thisPokemon.GetNextEvolutions());
+        try{
+            await UpdatePokedexDisplay(input.value);
+        }
+        catch(err){
+            console.error("Pokemon not found!")
+        }
 
-        mainPokemonDsp.setAttribute("src",thisPokemon.mainArt);
-        mainPokemonDsp.style.visibility = "visible";
-
-        nameDsp.innerText = thisPokemon.name;
-        idDsp.innerText = thisPokemon.id.toString();
-
-        heightDsp.innerText = thisPokemon.height.toString();
-        weightDsp.innerText = thisPokemon.weight.toString();
     })();
 
-    document.getElementById("reset-button").addEventListener("click", () =>
-    {
-        input.value = "";
-        mainPokemonDsp.style.visibility = "hidden";
-        mainPokemonDsp.setAttribute("src", "");
-        nameDsp.innerText = "";
-        idDsp.innerText = "";
-        heightDsp.innerText = "";
-        weightDsp.innerText = "";
-    });
-
-
 })
+
+document.getElementById("button-A").addEventListener("click",()=>
+{
+    (async () =>
+    {
+        currentIndex++;
+
+        if (currentIndex > MAX_POKEMON) currentIndex = 1;
+            await UpdatePokedexDisplay(currentIndex);
+
+    })();
+})
+
+document.getElementById("button-B").addEventListener("click",()=>{
+    (async () =>
+    {
+        currentIndex--;
+        if (currentIndex < 1) currentIndex = MAX_POKEMON;
+        await UpdatePokedexDisplay(currentIndex);
+
+
+    })();
+})
+
+document.getElementById("reset-button").addEventListener("click", () =>
+{
+    //reset EVERYTHING
+    input.value = "";
+    mainPokemonDsp.style.visibility = "hidden";
+    mainPokemonDsp.setAttribute("src", "");
+    nameDsp.innerText = "";
+    idDsp.innerText = "";
+    heightDsp.innerText = "";
+    weightDsp.innerText = "";
+});
