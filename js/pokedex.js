@@ -114,10 +114,11 @@ Pokemon.prototype.GetPrevEvolution = async function ()
  * the horizontal array determines the length of the evolution array
  * the vertical array determines alternative evolutions at that stage of the evolution chain
  * this is primarily to work with Eevee and its plethora of evolutionary forms
+ * NOTE: if the pokemon in question has no evolutions, this function will just return null
  *  * @returns {Promise<*|Response>}
  * @constructor
  */
-Pokemon.prototype.GetNextEvolutions = async function ()
+Pokemon.prototype.GetEvolutions = async function ()
 {
     //get evolution chain object
     let evoArray = [[], [], []];
@@ -125,6 +126,13 @@ Pokemon.prototype.GetNextEvolutions = async function ()
     let evoChain = await fetch(species.evolution_chain.url);
     evoChain = await evoChain.json();
     evoChain = evoChain.chain;
+    //first, check if the pokemon has any evolutions to begin with
+    //if not, return null
+    if(evoChain.evolves_to.length === 0)
+    {
+        console.log("no evolutions!");
+        return null;
+    }
 
     //figure out first pokemon in the chain and add to chain
     //because the first pokemon in the chain is NEVER an array (it is known) we can't loop through it.
@@ -168,6 +176,7 @@ const UpdatePokedexDisplay = async function(searchIndex){
 
     let currentPokemon;
     currentPokemon = await Pokemon.FetchPokemon(searchIndex);
+    currentIndex = currentPokemon.id;
     //set main Pokemon data
     mainPokemonDsp.setAttribute("src",currentPokemon.mainArt);
     mainPokemonDsp.style.visibility = "visible";
@@ -177,6 +186,70 @@ const UpdatePokedexDisplay = async function(searchIndex){
 
     heightDsp.innerText = currentPokemon.height.toString();
     weightDsp.innerText = currentPokemon.weight.toString();
+
+    //set move names
+    let moveArray = currentPokemon.GetMoves(moveDsps.length, true);
+    for(let i = 0; i < moveDsps.length; i++)
+    {
+        moveDsps[i].innerText = moveArray[i];
+    }
+    //get evolution chain data
+    let evolutionChain = await currentPokemon.GetEvolutions();
+    if(evolutionChain != null){
+
+        await Pokemon.FetchPokemon(evolutionChain[0][0])
+            .then((firstLink)=>{
+                let id = firstLink.id;
+                evolutionDsps[0].setAttribute("src", firstLink.GetFrontSpriteUrl());
+                evolutionDsps[0].style.visibility = "visible";
+            })
+            .catch((err)=>{
+                evolutionDsps[0].style.visibility = "hidden";
+            });
+
+        // if(evolutionChain[1].length > 1)
+        // {
+        //     console.log("get looping!")
+        // }
+
+        await Pokemon.FetchPokemon(evolutionChain[1][0])
+            .then((secondLink)=>{
+                evolutionDsps[1].setAttribute("src", secondLink.GetFrontSpriteUrl());
+                evolutionDsps[1].style.visibility = "visible";
+                evoArrows[0].style.visibility = "visible";
+            })
+            .catch((err)=>{
+                evolutionDsps[1].style.visibility = "hidden";
+                evoArrows[0].style.visibility = "hidden";
+            });
+
+        await Pokemon.FetchPokemon(evolutionChain[2][0])
+            .then((thirdLink)=>{
+                evolutionDsps[2].setAttribute("src", thirdLink.GetFrontSpriteUrl());
+                evolutionDsps[2].style.visibility = "visible";
+                evoArrows[1].style.visibility = "visible";
+            })
+            .catch((err)=>{
+                evolutionDsps[2].style.visibility = "hidden";
+                evoArrows[1].style.visibility = "hidden";
+            });
+    }
+    else
+    {
+        for(let display of evolutionDsps)
+        {
+            display.style.visibility = "hidden";
+
+        }
+        for(let arrow of evoArrows)
+        {
+            arrow.style.visibility = "hidden";
+        }
+    }
+
+
+
+    // console.table(evolutionChain);
 }
 
 
@@ -192,6 +265,10 @@ let idDsp = document.getElementById("poke-display__id");
 let heightDsp = document.getElementById("poke-display__height");
 let weightDsp = document.getElementById("poke-display__weight");
 
+let moveDsps = document.getElementsByClassName("move");
+let evolutionDsps = document.getElementsByClassName("poke-front-sprite");
+let evoArrows = document.getElementsByClassName("poke-arrow");
+
 let mainPokemonDsp = document.getElementById("poke-display__img__front");
 
 
@@ -200,57 +277,6 @@ document.getElementById("search-button").addEventListener("click", () =>
     //get pokemon based on user input
     (async () =>
     {
-        //wait until we get a fresh pokemon from the API
-        let thisPokemon;
-        thisPokemon = await Pokemon.FetchPokemon(input.value)
-
-        currentIndex = thisPokemon.id;
-
-        //we have retrieved the data of a new pokemon, now we can use this data for our pokedex
-        //USE POKEMON DATA IN POKEDEX HERE
-        console.log(thisPokemon.name);
-        console.log(thisPokemon.id);
-        //DONE USING POKEMON DATA FOR POKEDEX
-
-        //get previous evolution of this pokemon
-        //if there is no previous evolution, catch the exception and handle it.
-        let prevPokemon;
-        await thisPokemon.GetPrevEvolution()
-            .then((newPokemon) =>
-            {
-                prevPokemon = newPokemon;
-                console.log(prevPokemon.name);
-                console.log(prevPokemon.id);
-
-            })
-            .catch((err) =>
-            {
-                console.log("no prior evolution!");
-            });
-        console.log("...executing next job!");
-
-        //get full evolution chain of this pokemon
-        // await newPokemon.GetEvolutionChain()
-        //     .then((chain) =>
-        //     {
-        //         console.log(chain);
-        //
-        //     })
-        //     .catch((err) =>
-        //     {
-        //         console.error("oops!");
-        //     });
-
-        //return four moves of the pokemon in question
-        console.log(thisPokemon.GetMoves(4, false));
-      //  console.log(thisPokemon.GetMoves(4,false));
-
-      //  console.log("name: " + thisPokemon.name);
-     //   console.log("id: " + thisPokemon.id);
-      //  console.log("moves: " + thisPokemon.moves);
-      //  console.log("sprited: " + thisPokemon.sprites);
-
-
         try{
             await UpdatePokedexDisplay(input.value);
         }
@@ -269,8 +295,7 @@ document.getElementById("button-A").addEventListener("click",()=>
         currentIndex++;
 
         if (currentIndex > MAX_POKEMON) currentIndex = 1;
-            await UpdatePokedexDisplay(currentIndex);
-
+        UpdatePokedexDisplay(currentIndex);
     })();
 })
 
@@ -279,9 +304,7 @@ document.getElementById("button-B").addEventListener("click",()=>{
     {
         currentIndex--;
         if (currentIndex < 1) currentIndex = MAX_POKEMON;
-        await UpdatePokedexDisplay(currentIndex);
-
-
+        UpdatePokedexDisplay(currentIndex);
     })();
 })
 
